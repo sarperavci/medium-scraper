@@ -1,6 +1,6 @@
 # Medium Scraper
 
-A high-scale, async Medium scraper with request abstraction and HTML-to-Markdown parser. Quickly discover and convert Medium articles to clean Markdown with our intuitive web interface.
+A free, high-scale, async Medium scraper with request abstraction and HTML-to-Markdown parser. Quickly discover and convert Medium articles to clean Markdown with our intuitive web interface.
 
 <img width="1047" height="778" alt="Screenshot from 2025-08-26 16-04-20" src="https://github.com/user-attachments/assets/a6d7f310-0595-4e4c-b1ef-bca26cd84520" />
 
@@ -29,6 +29,27 @@ pip install medium-scraper[web]
 cd web && python app.py
 ```
 
+## 🚀 Usage
+
+### Setting up Decodo API
+
+[Decodo](https://visit.decodo.com/7a7O7A) provides a powerful API for scraping Medium articles. Our web interface supports this API out of the box.
+
+To use the Decodo API, you need to get an API key from Decodo. Sign up and get your API key from [Decodo](https://visit.decodo.com/7a7O7A).
+
+Once you have your API key, you can set it in the web interface by clicking the "Advanced Settings", set the `Sender` to `decodo-webscraping-api` and paste your API key in the `Decodo API Key` field.
+
+<img width="1045" height="306" alt="Screenshot from 2025-08-26 16-16-43" src="https://github.com/user-attachments/assets/dd384660-299c-4ec5-b692-c005f51c85b3" />
+
+### Setting up Custom Proxies
+
+You can set up custom proxies in the web interface by clicking the "Advanced Settings", set the `Sender` to `requests` and paste your proxy list in the `Proxies` field.
+
+### Setting up Proxyless
+
+You can set up proxyless in the web interface by clicking the "Advanced Settings", set the `Sender` to `requests` and leave the `Proxies` field empty.
+
+
 ### Features
 
 - **Intuitive GUI** for scraping Medium articles
@@ -36,37 +57,10 @@ cd web && python app.py
 - **Download results** as ZIP files
 - **Job history** and persistent storage
 - **Multiple request modes**:
-  - **Decodo API**: Smart managed scraping (requires [Decodo API key](https://decodo.com))
+  - **Decodo API**: Smart managed scraping (requires [Decodo API key](visit.decodo.com/7a7O7A))
   - **Custom Proxies**: Bring your own proxy list
   - **Proxyless**: Direct requests with your IP
 
-## 🔧 Core Features
-
-All components share these powerful features:
-
-- **Async/await support** for high-performance operations
-- **Multiple request backends**: Direct requests, custom proxies, or Decodo Scraper API
-- **Intelligent caching** with configurable backends
-- **Progress tracking** with callbacks
-- **Concurrent processing** with rate limiting
-- **Robust error handling** and retries
-
-### Web Interface
-- **Intuitive GUI** for scraping Medium articles
-- **Real-time progress tracking** via WebSocket
-- **Download results** as ZIP files
-- **Job history** and persistent storage
-- **Multiple request modes**:
-  - **Decodo API**: Smart managed scraping (requires [Decodo API key](https://decodo.com))
-  - **Custom Proxies**: Bring your own proxy list
-  - **Proxyless**: Direct requests with your IP
-
-### CLI Tool
-- **Interactive prompts** with rich formatting
-- **Progress bars** and detailed statistics  
-- **Multiple output formats** (JSON, Markdown files)
-- **Proxy support** and custom configurations
-- **Tag pagination** and article filtering
 
 ### Core Library
 These features are also available when using the library programmatically. See our [Library Documentation](docs/Library.md) for details.
@@ -86,13 +80,12 @@ The command-line interface offers powerful scraping capabilities. See our [CLI D
 pip install medium-scraper
 ```
 
-
 ## 📚 Request Senders
 
 The library supports multiple request backends:
 
 1. **RequestsRequestSender**: Standard requests library (works with custom proxies or proxyless)
-2. **DecodoScraperRequestSender**: Advanced scraping with [Decodo API](https://decodo.com) (requires API key)
+2. **DecodoScraperRequestSender**: Advanced scraping with [Decodo API](https://visit.decodo.com/7a7O7A) (requires API key)
 3. **CachedRequestSender**: Adds caching to any sender
 
 Choose the appropriate sender based on your needs:
