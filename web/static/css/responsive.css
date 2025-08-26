@@ -1,0 +1,18 @@
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .container { padding: 16px; }
+  header h1 { font-size: 20px; }
+  .tagline { font-size: 16px; }
+  .tabs { overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+  .tabs button { flex: 0 0 auto; padding: 8px 12px; }
+  .grid-layout { grid-template-columns: 1fr; gap: 16px; }
+  .card-header { font-size: 16px; }
+  .card-content { gap: 12px; }
+  .form-row { grid-template-columns: 1fr; }
+  textarea { min-height: 100px; }
+  .output-panel { max-height: 200px; }
+  .card-footer { flex-direction: column; }
+  .card-footer .btn { width: 100%; }
+  .site-footer { flex-direction: column; align-items: flex-start; gap: 6px; width: 100%; font-size: 12px; flex-wrap: wrap; }
+  .jobs-list .job-item { grid-template-columns: 1fr; gap: 8px; }
+}

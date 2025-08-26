@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Decodo Medium Scraper</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <link rel="stylesheet" href="static/css/main.css">
+  <link rel="stylesheet" href="static/css/responsive.css">
+</head>
+<body>
+
+<div id="app" class="container">
+  <header>
+    <h1>Decodo Medium Scraper</h1>
+    <div class="tagline">Scraping Medium, Simplified.</div>
+    <p class="subtitle">Retrieve articles by tag, then turn them into clean Markdown. Run live or as background jobs.</p>
+  </header>
+
+  <nav class="tabs">
+    <button :class="{ active: activeTab === 'scraper' }" @click="activeTab = 'scraper'">Scraper</button>
+    <button :class="{ active: activeTab === 'jobs' }" @click="activeTab = 'jobs'">Jobs</button>
+    <button :class="{ active: activeTab === 'help' }" @click="activeTab = 'help'">Help</button>
+  </nav>
+
+  <main v-show="activeTab === 'scraper'">
+    <div class="grid-layout">
+      <!-- PAGINATE CARD -->
+      <div class="card">
+        <div class="card-header">Retrieve Articles by Tag</div>
+        <div class="card-content">
+          <p class="text-muted">Fetch Medium articles under a specific tag for a month or a custom date range.</p>
+          <div class="form-group">
+            <label for="tag">Tag <span style="color: var(--danger);">*</span></label>
+            <input id="tag" v-model="paginate.tag" placeholder="e.g., programming" :class="{ 'error': !paginate.tag }">
+            <small class="text-muted">Examples: programming, ai, cybersecurity.</small>
+          </div>
+          
+          <div class="form-group">
+            <label>Date Mode</label>
+            <div class="segmented" role="tablist" aria-label="Date mode">
+              <button type="button" :class="{ active: paginate.dateMode === 'ym' }" @click="paginate.dateMode = 'ym'" :aria-pressed="paginate.dateMode === 'ym'">Year/Month</button>
+              <button type="button" :class="{ active: paginate.dateMode === 'range' }" @click="paginate.dateMode = 'range'" :aria-pressed="paginate.dateMode === 'range'">Date Range</button>
+            </div>
+            <small class="text-muted">Choose a specific year and month or provide a start/end date.</small>
+          </div>
+
+          <div v-if="paginate.dateMode === 'ym'" class="form-row">
+            <div class="form-group">
+              <label for="year">Year</label>
+              <input id="year" type="number" v-model.number="paginate.year" placeholder="2023">
+              <small class="text-muted">Defaults to the current year.</small>
+            </div>
+            <div class="form-group">
+              <label for="month">Month</label>
+              <input id="month" type="number" v-model.number="paginate.month" placeholder="10">
+              <small class="text-muted">1–12. Defaults to the current month.</small>
+            </div>
+          </div>
+
+          <div v-if="paginate.dateMode === 'range'" class="form-row">
+            <div class="form-group">
+                <label for="from_date">From Date</label>
+                <input id="from_date" type="date" v-model="paginate.from_date">
+                <small class="text-muted">Start date (inclusive).</small>
+            </div>
+            <div class="form-group">
+                <label for="to_date">To Date</label>
+                <input id="to_date" type="date" v-model="paginate.to_date">
+                <small class="text-muted">End date (inclusive).</small>
+            </div>
+          </div>
+          <div class="output-panel" v-text="truncate(paginate.resultText)"></div>
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-primary" @click="runPaginate('live')" :disabled="isLoading">Paginate (Live)</button>
+          <button class="btn btn-secondary" @click="runPaginate('job')" :disabled="isLoading">Paginate (Job)</button>
+          <button class="btn btn-secondary" @click="usePaginatedResults" :disabled="!paginate.results.length">Use Results</button>
+        </div>
+      </div>
+
+      <!-- SCRAPE CARD -->
+      <div class="card">
+        <div class="card-header">Scrape Articles to Markdown</div>
+        <div class="card-content">
+          <p class="text-muted">Convert article URLs into clean, readable Markdown. Paste URLs or reuse results from the left.</p>
+          <div class="form-group">
+            <label for="urls">URLs (newline-delimited or JSON)</label>
+            <textarea id="urls" v-model="scrape.urls" placeholder="https://medium.com/@user/post-1&#10;https://medium.com/p/12345"></textarea>
+            <small class="text-muted">One URL per line, or a JSON array of URLs/objects containing a url field.</small>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+                <label for="concurrency">Concurrency</label>
+                <input id="concurrency" type="number" v-model.number="settings.concurrency">
+                <small class="text-muted">How many articles to fetch in parallel. Higher is faster but heavier.</small>
+            </div>
+          </div>
+          <div class="output-panel" v-text="truncate(scrape.resultText)"></div>
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-primary" @click="runScrape('live')" :disabled="isLoading">Scrape (Live)</button>
+          <button class="btn btn-primary" @click="runScrape('zip')" :disabled="isLoading">Scrape & Download ZIP</button>
+          <button class="btn btn-secondary" @click="runScrape('job')" :disabled="isLoading">Scrape (Job)</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- ADVANCED SETTINGS -->
+    <div class="card">
+       <div class="card-header collapsible-header" @click="settings.expanded = !settings.expanded">
+         <span class="arrow" :class="{ down: settings.expanded }">&#9654;</span>
+         Advanced Settings
+       </div>
+       <div v-show="settings.expanded" class="card-content collapsible-content">
+          <div class="grid-layout">
+            <div class="form-group">
+              <label for="sender">Sender</label>
+              <select id="sender" v-model="settings.sender">
+                <option value="decodo">decodo-webscraping-api</option>
+                <option value="requests">requests</option>
+              </select>
+              <small class="text-muted">decodo-webscraping-api: smart managed scraping via Decodo. requests: direct HTTP using your proxies or IP.</small>
+            </div>
+            <div class="form-group" v-if="settings.sender === 'decodo'">
+              <label for="apiKey">Decodo API Key <span style="color: var(--danger);">*</span></label>
+              <input id="apiKey" v-model="settings.decodo_api_key" type="password" placeholder="api_key" :class="{ 'error': settings.sender === 'decodo' && !settings.decodo_api_key }">
+              <small class="text-muted">Required for Decodo sender.</small>
+            </div>
+            <div class="form-group" v-if="settings.sender === 'decodo'">
+              <label for="advanced">Mode</label>
+              <select id="advanced" v-model="settings.advanced">
+                  <option :value="false">Core</option>
+                  <option :value="true">Advanced</option>
+              </select>
+              <small class="text-muted">Core: fast and lightweight. Advanced: headless rendering for dynamic pages.</small>
+            </div>
+            <div class="form-group">
+              <label for="timeout">Timeout (seconds)</label>
+              <input id="timeout" type="number" v-model.number="settings.timeout">
+              <small class="text-muted">Maximum time to wait for each request before failing.</small>
+            </div>
+            <div class="form-group">
+              <label>
+                <input type="checkbox" v-model="settings.disable_cache">
+                Disable Cache Completely
+              </label>
+              <small class="text-muted">When enabled, all requests will bypass the cache system entirely.</small>
+            </div>
+          </div>
+          <div class="form-group" v-if="settings.sender === 'requests'">
+            <label for="proxies">Proxies</label>
+            <textarea id="proxies" v-model="settings.proxies" placeholder="http://user:pass@host:port&#10;socks5://host:port" style="min-height: 80px;"></textarea>
+            <small class="text-muted">Optional. One per line or JSON array. Used only when Sender is set to requests.</small>
+          </div>
+       </div>
+    </div>
+  </main>
+  
+  <main v-show="activeTab === 'help'">
+      <div class="card">
+          <div class="card-header">Help & Documentation</div>
+          <div class="card-content">
+              <div>
+                  <h4>What is this?</h4>
+                  <p>This tool retrieves Medium articles by tag and converts articles into Markdown using two request strategies.</p>
+              </div>
+              <div>
+                  <h4>How to use</h4>
+                  <ol>
+                      <li>Use <strong>Retrieve Articles by Tag</strong> to list articles for a month or date range.</li>
+                      <li>Click <strong>Use Results</strong> to populate the Scrape step, or paste URLs manually.</li>
+                      <li>Run <strong>Scrape</strong> live, as a job, or download a ZIP of Markdown files.</li>
+                  </ol>
+              </div>
+              <div>
+                  <h4>Sender modes</h4>
+                  <ul>
+                      <li><strong>decodo-webscraping-api</strong>: Uses Decodo's managed scraping. Requires an API key.</li>
+                      <li><strong>requests</strong>: Direct HTTP via your IP or proxies. Configure proxies in Advanced Settings.</li>
+                  </ul>
+              </div>
+              <div>
+                  <h4>Jobs</h4>
+                  <p>Jobs run in the background. View progress in the Jobs tab. When finished, use the output or download results.</p>
+              </div>
+              <div>
+                  <h4>Troubleshooting</h4>
+                  <ul>
+                      <li>Empty results: Check the tag and date range.</li>
+                      <li>Timeouts: Increase the timeout in Advanced Settings.</li>
+                      <li>Decodo errors: Verify your API key and account usage.</li>
+                  </ul>
+              </div>
+          </div>
+      </div>
+  </main>
+
+  <main v-show="activeTab === 'jobs'">
+      <div class="card">
+          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>Background Jobs</span>
+            <button class="btn btn-secondary btn-sm" @click="fetchJobs" :disabled="isLoading">Refresh</button>
+          </div>
+          <div class="card-content">
+              <div v-if="!jobs.length && !isLoading" class="text-muted">No jobs found.</div>
+              <div v-if="isLoading && !jobs.length" class="text-muted">Loading jobs...</div>
+              <div class="jobs-list">
+                  <div v-for="job in jobs" :key="job.id" class="job-item" @click="viewJob(job.id)">
+                      <div class="job-type">{{ job.job_type }}</div>
+                      <div class="job-id">{{ job.id }}</div>
+                      <div class="text-muted text-sm">{{ new Date(job.created_at * 1000).toLocaleString() }}</div>
+                      <div class="job-status" :class="job.status">
+                          {{ job.status }}
+                          <div v-if="job.status === 'running' && jobProgress[job.id]" class="job-progress-mini">
+                              {{ jobProgress[job.id].percentage.toFixed(0) }}%
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </main>
+
+  <footer class="site-footer">
+    <div>Created by <a href="https://github.com/sarperavci" target="_blank" rel="noopener noreferrer">@sarperavci</a></div>
+    <div>Powered by <a href="https://decodo.com" target="_blank" rel="noopener noreferrer">Decodo</a> &raquo;&raquo;</div>
+  </footer>
+
+  <!-- Job Detail Modal -->
+  <div v-if="selectedJob" class="modal-overlay" @click.self="selectedJob = null">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h3>Job Details</h3>
+              <button class="close-btn" @click="selectedJob = null">&times;</button>
+          </div>
+          <div class="modal-body">
+              <div v-if="isLoadingJobDetail">Loading details...</div>
+              <div v-else>
+                  <p><strong>ID:</strong> <span class="font-mono">{{ selectedJob.id }}</span></p>
+                  <p><strong>Type:</strong> {{ selectedJob.job_type }}</p>
+                  <p><strong>Status:</strong> <span class="job-status" :class="selectedJob.status">{{ selectedJob.status }}</span></p>
+                  <p><strong>Created:</strong> {{ new Date(selectedJob.created_at * 1000).toLocaleString() }}</p>
+                  
+                  <!-- Progress Display -->
+                  <div v-if="jobProgress[selectedJob.id] && (selectedJob.status === 'running' || jobProgress[selectedJob.id].percentage >= 100)" class="progress-section">
+                      <h4>Progress</h4>
+                      <div class="progress-bar-container">
+                          <div class="progress-bar">
+                              <div class="progress-fill" :style="{width: Math.min(jobProgress[selectedJob.id].percentage, 100) + '%'}"></div>
+                          </div>
+                          <div class="progress-text">
+                              {{ jobProgress[selectedJob.id].completed }} / {{ jobProgress[selectedJob.id].total }} 
+                              ({{ Math.min(jobProgress[selectedJob.id].percentage, 100).toFixed(1) }}%)
+                              <span v-if="jobProgress[selectedJob.id].percentage >= 100" class="completion-badge">✓ Complete</span>
+                          </div>
+                      </div>
+                      <div class="progress-stats">
+                          <span class="stat-success">✓ {{ jobProgress[selectedJob.id].success_count }}</span>
+                          <span class="stat-failed">✗ {{ jobProgress[selectedJob.id].failed_count }}</span>
+                          <span v-if="jobProgress[selectedJob.id].parse_failed_count > 0" class="stat-parse-failed">⚠ {{ jobProgress[selectedJob.id].parse_failed_count }}</span>
+                      </div>
+                      <div v-if="jobProgress[selectedJob.id].current_url && selectedJob.status === 'running'" class="current-processing">
+                          <small><strong>Processing:</strong> {{ truncateUrl(jobProgress[selectedJob.id].current_url, 60) }}</small>
+                      </div>
+                      <div v-if="jobProgress[selectedJob.id].percentage >= 100" class="completion-message">
+                          <small><strong>✅ Job completed successfully!</strong></small>
+                      </div>
+                  </div>
+                  
+                  <div>
+                      <h4>Input Payload</h4>
+                      <pre class="output-panel">{{ truncate(JSON.stringify(selectedJob.input, null, 2)) }}</pre>
+                  </div>
+                  
+                  <div v-if="selectedJob.output">
+                      <h4>Output</h4>
+                      <pre class="output-panel">{{ truncate(JSON.stringify(selectedJob.output, null, 2)) }}</pre>
+                  </div>
+
+                  <div v-if="selectedJob.error">
+                      <h4>Error</h4>
+                      <pre class="output-panel" style="color: var(--danger);">{{ truncate(selectedJob.error) }}</pre>
+                  </div>
+              </div>
+          </div>
+          <div class="modal-footer">
+              <button
+                  v-if="selectedJob.job_type.startsWith('scrape') && selectedJob.status === 'done'"
+                  class="btn btn-primary"
+                  @click="downloadJobZip(selectedJob.id)"
+                  :disabled="isDownloadingZip">
+                  Download Results ZIP
+              </button>
+              <button
+                  v-if="selectedJob.job_type && selectedJob.job_type.startsWith('paginate') && selectedJob.status === 'done'"
+                  class="btn btn-primary"
+                  @click="usePaginatedJobOutput()">
+                  Use Output in Scrape
+              </button>
+              <button class="btn btn-secondary" @click="selectedJob = null">Close</button>
+          </div>
+      </div>
+  </div>
+
+</div>
+
+<script src="static/js/utils.js"></script>
+<script src="static/js/api.js"></script>
+<script src="static/js/app.js"></script>
+
+</body>
+</html>
