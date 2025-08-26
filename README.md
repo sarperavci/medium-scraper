@@ -2,6 +2,9 @@
 
 A high-scale, async Medium scraper with request abstraction and HTML-to-Markdown parser. Quickly discover and convert Medium articles to clean Markdown with our intuitive web interface.
 
+<img width="1047" height="778" alt="Screenshot from 2025-08-26 16-04-20" src="https://github.com/user-attachments/assets/a6d7f310-0595-4e4c-b1ef-bca26cd84520" />
+
+
 ## 🌐 Web Interface (Recommended)
 
 The easiest way to use Medium Scraper is through our web interface:
