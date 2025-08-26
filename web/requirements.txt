@@ -1,3 +1,4 @@
 fastapi>=0.104.0
 uvicorn>=0.24.0
 medium-scraper>=0.1.0
+ua_generator
