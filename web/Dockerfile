@@ -7,10 +7,10 @@ RUN apt-get update && apt-get install -y \
     g++ \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+COPY web/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY web/ .
 
 RUN mkdir -p data
 
