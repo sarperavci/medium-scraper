@@ -6,20 +6,24 @@ A high-scale, async Medium scraper with request abstraction and HTML-to-Markdown
 
 The easiest way to use Medium Scraper is through our web interface:
 
+### Docker Deployment (Easiest Setup)
+
+Pull our pre-built image from GitHub Container Registry:
+
+```bash
+docker run -p 8000:8000 ghcr.io/sarperavci/medium-scraper:latest
+```
+
+Then open your browser to `http://localhost:8000`
+
+### Alternative Installation
+
 ```bash
 # Install web dependencies  
 pip install medium-scraper[web]
 
 # Run web server
 cd web && python app.py
-```
-
-Then open your browser to `http://localhost:8000`
-
-### Docker Deployment (Easiest Setup)
-
-```bash
-cd web && docker build -t medium-scraper-web . && docker run -p 8000:8000 medium-scraper-web
 ```
 
 ### Features
@@ -32,7 +36,6 @@ cd web && docker build -t medium-scraper-web . && docker run -p 8000:8000 medium
   - **Decodo API**: Smart managed scraping (requires [Decodo API key](https://decodo.com))
   - **Custom Proxies**: Bring your own proxy list
   - **Proxyless**: Direct requests with your IP
-
 
 ## 🔧 Core Features
 
@@ -65,12 +68,21 @@ All components share these powerful features:
 ### Core Library
 These features are also available when using the library programmatically. See our [Library Documentation](docs/Library.md) for details.
 
+## 📚 Library Usage
+
+For programmatic usage of the core library, please refer to our [Library Documentation](docs/Library.md) which provides detailed examples.
+
+## 🖥️ CLI Tool
+
+The command-line interface offers powerful scraping capabilities. See our [CLI Documentation](docs/CLI.md) for comprehensive usage instructions.
+
 ## 🛠️ Installation Options
 
 ### Basic Installation
 ```bash
 pip install medium-scraper
 ```
+
 
 ## 📚 Request Senders
 
@@ -110,14 +122,6 @@ async def main():
 
 asyncio.run(main())
 ```
-
-## 📚 Library Usage
-
-For programmatic usage of the core library, please refer to our [Library Documentation](docs/Library.md) which provides detailed examples.
-
-## 🖥️ CLI Tool
-
-The command-line interface offers powerful scraping capabilities. See our [CLI Documentation](docs/CLI.md) for comprehensive usage instructions.
 
 
 ## 📖 Documentation
