@@ -46,7 +46,4 @@ class RequestSender(ABC):
         headers: Optional[Mapping[str, str]] = None,
         **kwargs: Any,
     ) -> HttpResponse:
-        if await self.is_safe_url(url):
-            return await self.request("GET", url, timeout=timeout, headers=headers, **kwargs)
-        else:
-            raise ValueError("Unsafe URL")
+        return await self.request("GET", url, timeout=timeout, headers=headers, **kwargs)
