@@ -4,6 +4,22 @@ A free, high-scale, async Medium scraper with request abstraction and HTML-to-Ma
 
 <img width="1047" height="778" alt="Screenshot from 2025-08-26 16-04-20" src="https://github.com/user-attachments/assets/a6d7f310-0595-4e4c-b1ef-bca26cd84520" />
 
+### Decodo
+
+<img width="1280" height="800" alt="1756709054016" src="https://github.com/user-attachments/assets/554d4a76-3407-4953-9970-b05070e0faae" />
+
+
+Collect real-time data from any website with Decodo’s Web Scraping API and award-winning proxies.
+
+– Free trials available
+
+– 125M+ IPs in 195+ locations
+
+– 100+ ready-made scraping templates
+
+– Extensive documentation
+
+– 24/7 tech support
 
 ## 🌐 Web Interface (Recommended)
 
