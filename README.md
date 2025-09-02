@@ -6,8 +6,7 @@ A free, high-scale, async Medium scraper with request abstraction and HTML-to-Ma
 
 ### Decodo
 
-<img width="1280" height="800" alt="1756709054016" src="https://github.com/user-attachments/assets/554d4a76-3407-4953-9970-b05070e0faae" />
-
+[<img width="1280" height="800" alt="1756709054016" src="https://github.com/user-attachments/assets/554d4a76-3407-4953-9970-b05070e0faae"/>](https://visit.decodo.com/7a7O7A)
 
 Collect real-time data from any website with Decodo’s Web Scraping API and award-winning proxies.
 
